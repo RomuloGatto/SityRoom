@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_socketio import SocketIO, emit, join_room, leave_room
+import datetime
 import re 
 
 app = Flask(__name__) 
@@ -84,7 +85,11 @@ def joined(message):
 @socketio.on('text', namespace='/chat')
 def text(message):
     room = session.get('room')
-    emit('message', {'msg': session.get('username') + ':' + message['msg']}, room=room)
+    dtMsg = datetime.datetime.now()
+    curDate = '{}-{}-{}'.format(dtMsg.year, dtMsg.month, dtMsg.day)
+    curTime = '{}:{}:{}'.format(dtMsg.hour, dtMsg.minute, dtMsg.second)
+
+    emit('message', {'msg': curDate + ' ' + curTime + ' | ' + session.get('username') + ': ' + message['msg']}, room=room)
     if "/stock=" in message['msg']:
         stock = re.search('(?<=\/stock=).*?(?=\s)', message['msg'])
         print(stock.match)
