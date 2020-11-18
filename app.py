@@ -1,10 +1,14 @@
 from flask import Flask, render_template, request, redirect, url_for, session
+from flask_socketio import SocketIO, emit, join_room, leave_room
 import re 
 
 app = Flask(__name__) 
 app.debug = True
 app.secret_key = '35ba1b653d97423f9bd67d3309bd012b'
 
+socketio = SocketIO()
+socketio.init_app(app)  
+  
 ### App Routes ###
 
 @app.route('/') 
@@ -23,17 +27,18 @@ def login():
             session['room'] = 12345
             session['username'] = account['username'] 
             msg = 'Logged in successfully !'
+            return render_template('chat.html', name=account['username'], room=session['room'])
         else: 
             msg = 'Incorrect username / password !'
     return render_template('login.html', msg = msg) 
-
+  
 @app.route('/logout') 
 def logout(): 
     session.pop('loggedin', None) 
     session.pop('room', None) 
     session.pop('username', None) 
     return redirect(url_for('login')) 
-
+  
 @app.route('/register', methods =['GET', 'POST']) 
 def register(): 
     from functions.sqlquery import sql_query2, sql_edit_insert
@@ -57,3 +62,38 @@ def register():
     elif request.method == 'POST': 
         msg = 'Please fill out the form !'
     return render_template('register.html', msg = msg) 
+
+@app.route('/chat')
+def chat():
+    """Chat room. The user's name and room must be stored in
+    the session."""
+    name = session.get('username', '')
+    room = session.get('room', '')
+    if name == '' or room == '':
+        return redirect(url_for('login'))
+    return render_template('chat.html', name=name, room=room)
+
+### SocketIO Listeners ###
+
+@socketio.on('joined', namespace='/chat')
+def joined(message):
+    room = session.get('room')
+    join_room(room)
+    emit('status', {'msg': session.get('username') + ' has entered the room.'}, room=room)
+
+@socketio.on('text', namespace='/chat')
+def text(message):
+    room = session.get('room')
+    emit('message', {'msg': session.get('username') + ':' + message['msg']}, room=room)
+    if "/stock=" in message['msg']:
+        stock = re.search('(?<=\/stock=).*?(?=\s)', message['msg'])
+        print(stock.match)
+
+@socketio.on('left', namespace='/chat')
+def left(message):
+    room = session.get('room')
+    leave_room(room)
+    emit('status', {'msg': session.get('name') + ' has left the room.'}, room=room)
+
+if __name__ == "__main__":
+    socketio.run(app)
