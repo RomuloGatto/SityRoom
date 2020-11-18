@@ -16,6 +16,15 @@
                 });
                 socket.on('message', function(data) {
                     $('#chat').val($('#chat').val() + data.msg + '\n');
+                    lines = $('#chat').val().split("\n")
+                    nLines = lines.length - 1
+                    maxLines = 50
+
+                    if (nLines > maxLines ){
+                        lines = lines.slice(1) 
+                        $('#chat').val(lines.join('\n'))
+                    }
+
                     $('#chat').scrollTop($('#chat')[0].scrollHeight);
                 });
                 $('#text').keypress(function(e) {
