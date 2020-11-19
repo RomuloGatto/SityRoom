@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_socketio import SocketIO, emit, join_room, leave_room
 import datetime
+import pika
 import re 
 
 app = Flask(__name__) 
@@ -92,13 +93,20 @@ def text(message):
     emit('message', {'msg': curDate + ' ' + curTime + ' | ' + session.get('username') + ': ' + message['msg']}, room=room)
     if "/stock=" in message['msg']:
         stock = re.search('(?<=\/stock=).*?(?=\s)', message['msg'])
-        print(stock.match)
+        sendMessageRabbitMQ(message['msg'][stock.start():stock.end()])
+
 
 @socketio.on('left', namespace='/chat')
 def left(message):
     room = session.get('room')
     leave_room(room)
     emit('status', {'msg': session.get('name') + ' has left the room.'}, room=room)
+
+def sendMessageRabbitMQ(message):
+    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost', 5672, '/', pika.PlainCredentials('user', 'password')))
+    channel = connection.channel()
+    channel.basic_publish(exchange='my_exchange', routing_key='test', body=message)
+    connection.close()
 
 if __name__ == "__main__":
     socketio.run(app)
