@@ -4,9 +4,17 @@ import csv
 def checkStock(inputTicker):
     try:
         if inputTicker == '':
-            return 'ERR: input ticker is missing'
+            return 'ERR: Input is missing'
 
-        urlCSV = 'https://stooq.com/q/l/?s={}&f=sd2t2ohlcv&h&e=csv'.format(inputTicker)
+        data = inputTicker.split('|')
+        
+        if len(data) != 2:
+            return 'ERR: Wrong No of parameters'
+
+        ticker = data[0]
+        room = data[1]
+
+        urlCSV = r'https://stooq.com/q/l/?s={}&f=sd2t2ohlcv&h&e=csv'.format(ticker)
 
         with requests.Session() as s:
             download = s.get(urlCSV)
@@ -18,6 +26,6 @@ def checkStock(inputTicker):
             realTicker = content[1][0]
             quoteClose = content[1][6]
 
-            return '{} quote is ${} per share'.format(realTicker, quoteClose)
+            return '{} quote is ${} per share|{}'.format(realTicker, quoteClose, room)
     except Exception as e:
         return "ERR: " + str(e)
