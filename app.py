@@ -85,11 +85,14 @@ def sendBotReply():
     message = data[0]
     room = data[1]
 
+    if message.startswith('ERR: '):
+        message = data[0].replace('ERR: ', '')
+
     dtMsg = datetime.datetime.now()
     curDate = '{}-{:02d}-{:02d}'.format(dtMsg.year, dtMsg.month, dtMsg.day)
     curTime = '{:02d}:{:02d}:{:02d}'.format(dtMsg.hour, dtMsg.minute, dtMsg.second)
     
-    emit('message', {'msg': curDate + ' ' + curTime + ' | ' + 'StooqBot' + ': ' +message}, room=room, namespace='/chat')
+    emit('message', {'msg': curDate + ' ' + curTime + ' | ' + 'StooqBot' + ': ' + message}, room=room, namespace='/chat')
     return "Ok"
 
 @socketio.on('joined', namespace='/chat')
@@ -106,10 +109,12 @@ def text(message):
     curTime = '{:02d}:{:02d}:{:02d}'.format(dtMsg.hour, dtMsg.minute, dtMsg.second)
 
     emit('message', {'msg': curDate + ' ' + curTime + ' | ' + session.get('username') + ': ' + message['msg']}, room=room)
-    if "/stock=" in message['msg']:
-        stock = re.search('(?<=\/stock=).*', message['msg'])
-        sendMessageRabbitMQ('{}|{}'.format(message['msg'][stock.start():stock.end()], room))
-
+    match = re.search('(?<=\/)(.*?)(?=\=)', message['msg'])
+    if match:
+        cmd = message['msg'][match.start():match.end()]
+        ticker = match.string.split('=')[1]
+        sendMessageRabbitMQ('{}|{}|{}'.format(cmd, match.string.split('=')[1], room))
+        
 @socketio.on('left', namespace='/chat')
 def left(message):
     room = session.get('room')
@@ -138,4 +143,4 @@ thread.start()
 ### Start API
 
 if __name__ == "__main__":
-    socketio.run(app)
+    socketio.run(app, port=5000)

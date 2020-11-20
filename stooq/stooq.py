@@ -1,18 +1,22 @@
 import requests
 import csv
 
-def checkStock(inputTicker):
+def checkStock(inputContent):
+    if inputContent == '':
+        return 'ERR: Input is missing'
+
+    data = inputContent.split('|')
+    
+    if len(data) != 3:
+        return 'ERR: Wrong No of parameters'
+
     try:
-        if inputTicker == '':
-            return 'ERR: Input is missing'
+        cmd =  data[0]
+        ticker = data[1]
+        room = data[2]
 
-        data = inputTicker.split('|')
-        
-        if len(data) != 2:
-            return 'ERR: Wrong No of parameters'
-
-        ticker = data[0]
-        room = data[1]
+        if cmd != 'stock':
+            return 'ERR: Command({}) not supported|{}'.format(cmd, room)
 
         urlCSV = r'https://stooq.com/q/l/?s={}&f=sd2t2ohlcv&h&e=csv'.format(ticker)
 
