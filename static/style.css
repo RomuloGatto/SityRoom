@@ -1,52 +1,59 @@
-/* Store this code in 'style.css' file inside the 'static' folder*/
-  
+@import url('https://fonts.googleapis.com/css?family=Open+Sans&display=swap');
+
+* {
+  font-family: 'Open Sans';
+}
+
 .header{ 
     padding: 5px 120px; 
     width: 150px; 
     height: 70px; 
-    background-color: #236B8E;  
+    background-color: #72bd6d;  
+} 
+
+.word{ 
+  color: #FFFFFF; 
+  font-weight: bold; 
 } 
 
 .border{ 
     padding: 80px 50px; 
     width: 400px; 
     height: 450px; 
-    border: 1px solid #236B8E; 
-    border-radius: 0px; 
-    background-color: #9AC0CD; 
+    border: 5px solid #28a745;
+    border-radius: 30px; 
+    background-color: rgba(40,167,69,0.25); 
 } 
+
+.chat{
+    width: 800px; 
+    height: 500px; 
+    border: 5px solid #28a745;
+    border-radius: 5px; 
+    background-color: rgba(40,167,69,0.25); 
+}
 
 .btn { 
     padding: 10px 40px; 
-    background-color: #236B8E;  
+    background-color: #72bd6d;  
     color: #FFFFFF; 
-    font-style: oblique; 
     font-weight: bold; 
-    border-radius: 10px; 
+    border-radius: 5px; 
 } 
 
 .textbox{ 
     padding: 10px 40px; 
-    background-color: #236B8E;  
-    text-color: #FFFFFF; 
-    border-radius: 10px; 
+    background-color: #72bd6d;  
+    border-radius: 5px; 
+    color: #FFFFFF;
 } 
       
 ::placeholder { 
     color: #FFFFFF; 
     opacity: 1; 
-    font-style: oblique; 
-    font-weight: bold; 
-} 
-
-.word{ 
-    color: #FFFFFF; 
-    font-style: oblique; 
-    font-weight: bold; 
 } 
 
 .bottom{ 
-    color: #236B8E; 
-    font-style: oblique; 
+    color: #28a745; 
     font-weight: bold; 
 } 
