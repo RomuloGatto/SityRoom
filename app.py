@@ -48,20 +48,21 @@ def register():
     from functions.sqlquery import sql_query2, sql_edit_insert
 
     msg = '' 
-    if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'first_name' in request.form and 'last_name' in request.form : 
-        first_name = request.form['first_name']  
-        last_name = request.form['last_name'] 
+    if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'email' in request.form: 
+        email = request.form['email']  
         username = request.form['username'] 
         password = request.form['password'] 
         cursor = sql_query2(''' SELECT * FROM data_table where username = ?''', (username,))
         if len(cursor) > 0: 
-            msg = 'Account already exists !'
+            msg = 'Account already exists!'
         elif not re.match(r'[A-Za-z0-9]+', username): 
-            msg = 'Username must contain only characters and numbers !'
-        elif not username or not password or not first_name or not last_name: 
+            msg = 'Username must contain only characters and numbers!'
+        elif not re.search(r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$',email):
+            msg = 'Email must be a valid one!'
+        elif not username or not password or not email: 
             msg = 'Please fill out the form !'
         else: 
-            sql_edit_insert('INSERT INTO data_table(first_name,last_name,username,password) VALUES (?, ?, ?, ?)', (first_name,last_name,username,password)) 
+            sql_edit_insert('INSERT INTO data_table(email,username,password) VALUES (?, ?, ?)', (email,username,password)) 
             msg = 'You have successfully registered !'
     elif request.method == 'POST': 
         msg = 'Please fill out the form !'

@@ -2,21 +2,20 @@ import os
 import sqlite3
 import pandas as pd
 
-headers = ['first_name','last_name','username','password']
+headers = ['email','username','password']
 data_url = 'users.csv'
 data_table = pd.read_csv(data_url, header=None, names=headers, converters={'zip': str})
 
 # Clear example.db if it exists
-if os.path.exists('example.db'):
-    os.remove('example.db')
+if os.path.exists('sqlite.db'):
+    os.remove('sqlite.db')
 
 # Create a database
-conn = sqlite3.connect('example.db', check_same_thread=False)
+conn = sqlite3.connect('sqlite.db', check_same_thread=False)
 
 # Add the data to our database
 data_table.to_sql('data_table', conn, dtype={
-    'first_name':'VARCHAR(50)',
-    'last_name':'VARCHAR(50)',
+    'email':'VARCHAR(50)',
     'username':'VARCHAR(20)',
     'password':'VARCHAR(20)'
 })
