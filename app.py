@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_socketio import SocketIO, emit, join_room, leave_room
+from threading import Thread, Lock
+import requests
 import datetime
 import pika
 import re 
@@ -8,8 +10,8 @@ app = Flask(__name__)
 app.debug = True
 app.secret_key = '35ba1b653d97423f9bd67d3309bd012b'
 
-socketio = SocketIO()
-socketio.init_app(app)  
+socketio = SocketIO(app, logger=True, engineio_logger=True)
+#socketio.init_app(app)  
   
 ### App Routes ###
 
@@ -26,7 +28,7 @@ def login():
         if len(cursor) > 0: 
             account = cursor[0]
             session['loggedin'] = True
-            session['room'] = 12345
+            session['room'] = 'main'
             session['username'] = account['username'] 
             msg = 'Logged in successfully !'
             return render_template('chat.html', name=account['username'], room=session['room'])
@@ -75,14 +77,24 @@ def chat():
         return redirect(url_for('login'))
     return render_template('chat.html', name=name, room=room)
 
-### SocketIO Listeners ###
+@app.route('/rmq-redirect', methods=['GET'])
+def sendBotReply():
+    data = request.args.get('msg').split('|')
+    message = data[0]
+    room = data[1]
+
+    dtMsg = datetime.datetime.now()
+    curDate = '{}-{}-{}'.format(dtMsg.year, dtMsg.month, dtMsg.day)
+    curTime = '{}:{}:{}'.format(dtMsg.hour, dtMsg.minute, dtMsg.second)
+    
+    emit('message', {'msg': curDate + ' ' + curTime + ' | ' + 'StooqBot' + ': ' +message}, room=room, namespace='/chat')
 
 @socketio.on('joined', namespace='/chat')
 def joined(message):
     room = session.get('room')
     join_room(room)
     emit('status', {'msg': session.get('username') + ' has entered the room.'}, room=room)
-
+    
 @socketio.on('text', namespace='/chat')
 def text(message):
     room = session.get('room')
@@ -93,20 +105,34 @@ def text(message):
     emit('message', {'msg': curDate + ' ' + curTime + ' | ' + session.get('username') + ': ' + message['msg']}, room=room)
     if "/stock=" in message['msg']:
         stock = re.search('(?<=\/stock=).*?(?=\s)', message['msg'])
-        sendMessageRabbitMQ(message['msg'][stock.start():stock.end()])
-
+        sendMessageRabbitMQ('{}|{}'.format(message['msg'][stock.start():stock.end()], room))
 
 @socketio.on('left', namespace='/chat')
 def left(message):
     room = session.get('room')
     leave_room(room)
-    emit('status', {'msg': session.get('name') + ' has left the room.'}, room=room)
+    emit('status', {'msg': session.get('username') + ' has left the room.'}, room=room)
 
 def sendMessageRabbitMQ(message):
     connection = pika.BlockingConnection(pika.ConnectionParameters('localhost', 5672, '/', pika.PlainCredentials('user', 'password')))
     channel = connection.channel()
     channel.basic_publish(exchange='my_exchange', routing_key='test', body=message)
     connection.close()
+
+### Consumer RabbitMQ
+
+connection = pika.BlockingConnection(pika.ConnectionParameters('localhost', 5672, '/', pika.PlainCredentials("user", "password")))
+channel = connection.channel()
+
+def callback(ch, method, properties, body):
+    requests.get('http://localhost:5000/rmq-redirect?msg=' + body.decode("utf-8"))
+
+channel.basic_consume(queue="my_app", on_message_callback=callback, auto_ack=True)
+
+thread = Thread(target = channel.start_consuming)
+thread.start() 
+
+### Start API
 
 if __name__ == "__main__":
     socketio.run(app)
