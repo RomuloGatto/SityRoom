@@ -6,19 +6,8 @@ headers = ['email','username','password']
 data_url = 'users.csv'
 data_table = pd.read_csv(data_url, header=None, names=headers, converters={'zip': str})
 
-# Clear example.db if it exists
-if os.path.exists('sqlite.db'):
-    os.remove('sqlite.db')
-
 # Create a database
 conn = sqlite3.connect('sqlite.db', check_same_thread=False)
-
-# Add the data to our database
-data_table.to_sql('data_table', conn, dtype={
-    'email':'VARCHAR(50)',
-    'username':'VARCHAR(20)',
-    'password':'VARCHAR(20)'
-})
 
 conn.row_factory = sqlite3.Row
 
