@@ -90,6 +90,7 @@ def sendBotReply():
     curTime = '{}:{}:{}'.format(dtMsg.hour, dtMsg.minute, dtMsg.second)
     
     emit('message', {'msg': curDate + ' ' + curTime + ' | ' + 'StooqBot' + ': ' +message}, room=room, namespace='/chat')
+    return "Ok"
 
 @socketio.on('joined', namespace='/chat')
 def joined(message):
@@ -106,7 +107,7 @@ def text(message):
 
     emit('message', {'msg': curDate + ' ' + curTime + ' | ' + session.get('username') + ': ' + message['msg']}, room=room)
     if "/stock=" in message['msg']:
-        stock = re.search('(?<=\/stock=).*?(?=\s)', message['msg'])
+        stock = re.search('(?<=\/stock=).*', message['msg'])
         sendMessageRabbitMQ('{}|{}'.format(message['msg'][stock.start():stock.end()], room))
 
 @socketio.on('left', namespace='/chat')
