@@ -86,8 +86,8 @@ def sendBotReply():
     room = data[1]
 
     dtMsg = datetime.datetime.now()
-    curDate = '{}-{}-{}'.format(dtMsg.year, dtMsg.month, dtMsg.day)
-    curTime = '{}:{}:{}'.format(dtMsg.hour, dtMsg.minute, dtMsg.second)
+    curDate = '{}-{:02d}-{:02d}'.format(dtMsg.year, dtMsg.month, dtMsg.day)
+    curTime = '{:02d}:{:02d}:{:02d}'.format(dtMsg.hour, dtMsg.minute, dtMsg.second)
     
     emit('message', {'msg': curDate + ' ' + curTime + ' | ' + 'StooqBot' + ': ' +message}, room=room, namespace='/chat')
     return "Ok"
@@ -102,8 +102,8 @@ def joined(message):
 def text(message):
     room = session.get('room')
     dtMsg = datetime.datetime.now()
-    curDate = '{}-{}-{}'.format(dtMsg.year, dtMsg.month, dtMsg.day)
-    curTime = '{}:{}:{}'.format(dtMsg.hour, dtMsg.minute, dtMsg.second)
+    curDate = '{}-{:02d}-{:02d}'.format(dtMsg.year, dtMsg.month, dtMsg.day)
+    curTime = '{:02d}:{:02d}:{:02d}'.format(dtMsg.hour, dtMsg.minute, dtMsg.second)
 
     emit('message', {'msg': curDate + ' ' + curTime + ' | ' + session.get('username') + ': ' + message['msg']}, room=room)
     if "/stock=" in message['msg']:
