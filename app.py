@@ -24,11 +24,12 @@ def login():
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form: 
         username = request.form['username'] 
         password = request.form['password'] 
+        room = request.form['room'] 
         cursor = sql_query2('SELECT * FROM data_table WHERE username = ? AND password = ?', (username, password)) 
         if len(cursor) > 0: 
             account = cursor[0]
             session['loggedin'] = True
-            session['room'] = 'main'
+            session['room'] = room
             session['username'] = account['username'] 
             msg = 'Logged in successfully !'
             return render_template('chat.html', name=account['username'], room=session['room'])
