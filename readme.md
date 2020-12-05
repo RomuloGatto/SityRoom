@@ -34,7 +34,7 @@ pip install -r requirements.txt
 Clone and configure the RabbitMQ docker image 
 ```bash
 docker pull rabbitmq:3-management
-docker-compose up --no-start
+docker-compose -p sityroom up --no-start
 ```
 ## Usage
 
@@ -42,7 +42,7 @@ You will need to run:
 
 - Docker image with RabbitMQ on it, to enable Bot running
 ```bash
-docker start jobsity_rabbitmq_1
+docker start sityroom_rabbitmq_1
 ```
 - Service Bot
 ```bash
