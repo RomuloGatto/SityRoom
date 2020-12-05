@@ -6,7 +6,7 @@ This project has, as the main objective, the creation of multiple chat rooms. As
 - Limitation of the quantity of the messages to be shown
 - A bot that expects the command /stock and returns the close price
 
-## Pre Requisites
+## Pre-requisites
 
 This project was developed on Windows, so you will need to install the packages below to run everything smooth
 - Python 3.8+: `https://www.python.org/downloads/`
@@ -31,13 +31,18 @@ Use the package manager pip to install all required packages.
 pip install -r requirements.txt
 ```
 
+Clone and configure the RabbitMQ docker image 
+```bash
+docker pull rabbitmq:3-management
+docker-compose up --no-start
+```
 ## Usage
 
 You will need to run: 
 
 - Docker image with RabbitMQ on it, to enable Bot running
 ```bash
-docker run -d --hostname my-rabbit -p 15672:15672 -p 5672:5672 --name rabbit-server -e RABBITMQ_DEFAULT_USER=user -e RABBITMQ_DEFAULT_PASS=password rabbitmq:3-management
+docker start jobsity_rabbitmq_1
 ```
 - Service Bot
 ```bash
